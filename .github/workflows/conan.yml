@@ -17,37 +17,10 @@ on: [push, pull_request]
 name: conan
 
 jobs:
-  generate-matrix:
-    name: Generate Job Matrix
-    runs-on: ubuntu-20.04
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    env:
-      BPT_CONFIG_FILE_VERSION: "11"
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: "0"
-      - uses: actions/setup-python@v2
-        with:
-          python-version: "3.8"
-      - name: Install Package Tools
-        run: |
-          pip install bincrafters_package_tools
-          conan user
-      - name: Generate Job Matrix
-        id: set-matrix
-        run: |
-          MATRIX=$(bincrafters-package-tools generate-ci-jobs --platform gha)
-          echo "${MATRIX}"
-          echo "::set-output name=matrix::${MATRIX}"
   conan:
-    needs: generate-matrix
-    runs-on: ${{ matrix.config.os }}
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
-    name: ${{ matrix.config.name }}
     env:
       BPT_CONFIG_FILE_VERSION: "11"
     steps:
@@ -58,17 +31,19 @@ jobs:
         with:
           python-version: "3.8"
       - name: Install Conan
-        env:
-          BPT_MATRIX: ${{toJson(matrix.config)}}
         run: |
-          pip install bincrafters_package_tools
-          # remove newlines from matrix first
-          matrix=$(echo ${BPT_MATRIX})
-          bincrafters-package-tools prepare-env --platform gha --config "${matrix}"
+          pip install conan
         shell: bash
       - name: Run
         env:
           CONAN_LOGIN_USERNAME: ${{ secrets.CONAN_LOGIN_USERNAME }}
           CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
         run: |
-          bincrafters-package-tools --auto
+          conan export .
+          conan install PfWebApp/0.0.1@ -pr:h emscripten -pr:b default -b missing
+
+      - name: Deploy ??
+        uses: JamesIves/github-pages-deploy-action@4.1.5
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: web # The folder the action should deploy.
