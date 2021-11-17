@@ -9,6 +9,9 @@ class PfWebApp(ConanFile):
 
     settings = "os", "arch", "build_type"
 
+    def build_requirements(self):
+        self.build_requires("make/4.3")
+
     def export_sources(self):
         self.copy("shell_minimal.html")
         self.copy("makefile")

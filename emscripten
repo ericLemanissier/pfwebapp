@@ -4,4 +4,3 @@ arch=wasm
 build_type=Release
 [build_requires]
 emsdk/2.0.31
-make/4.3
