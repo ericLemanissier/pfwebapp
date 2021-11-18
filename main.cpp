@@ -16,6 +16,7 @@
 #include <SDL_opengles2.h>
 
 #include "implot.h"
+#include <emscripten/val.h>
 
 namespace ImPlot {
 void ShowDemoWindow(bool* p_open);
@@ -157,23 +158,23 @@ static void main_loop(void* arg)
 
         if (ImGui::Button("Bluetooth"))
         {
-            EM_ASM(
-                navigator.bluetooth.getAvailability().then(available => {
-                if (available)
-                {
-                    console.log("This device supports Bluetooth!");
-                    navigator.bluetooth.requestDevice({acceptAllDevices: true}).then(function(device) {
-                        console.log('Name: ' + device.name);
-                        // Do something with the device.
-                        })
-                        .catch(function(error) {
-                        console.log("Something went wrong. " + error);
-                        });
-                }
-                else
-                    console.log("Doh! Bluetooth is not supported");
-                });
-            );
+            const auto navigator = emscripten::val::global("navigator");
+            const auto bluetooth = navigator["bluetooth"];
+            const auto available = bluetooth.call<emscripten::val>("getAvailability").await();
+            if (available.as<bool>())
+            {
+                auto options = emscripten::val::object();
+                options.set("acceptAllDevices", true);
+                const auto device = bluetooth.call<emscripten::val>("requestDevice", options).await();
+                const auto console = emscripten::val::global("console");
+                console.call<void>("log", std::string("name: ") + device["name"].as<std::string>());
+            }
+            else
+            {
+                EM_ASM(
+                    alert('bluetooth not available');
+                );
+            }
         }
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
