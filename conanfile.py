@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake
 from conans.client import tools
-import os
 
 
 class PfWebApp(ConanFile):
