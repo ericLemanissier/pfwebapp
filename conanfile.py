@@ -6,15 +6,19 @@ class PfWebApp(ConanFile):
     name = "PfWebApp"
     version = "0.0.1"
 
-    settings = "os", "arch", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
 
-    def build_requirements(self):
-        self.build_requires("make/4.3")
+    generators = "cmake", "cmake_find_package_multi"
+
+    def requirements(self):
+        self.requires("imgui/1.85")
+        self.requires("implot/0.11")
 
     def export_sources(self):
         self.copy("shell_minimal.html")
-        self.copy("makefile")
-        self.copy("main.cpp")
+        self.copy("*.cpp")
+        self.copy("*.h")
+        self.copy("CMakeLists.txt")
 
     def source(self):
         tools.get(url="https://github.com/ocornut/imgui/archive/v1.85.tar.gz",
@@ -26,12 +30,18 @@ class PfWebApp(ConanFile):
             destination=".",
             strip_root=True)
 
+    def _configure_cmake(self):
+        cmake = CMake(self)
+        cmake.configure()
+        return cmake
 
     def build(self):
-        self.run("%s all IMGUI_DIR=. IMPLOT_DIR=." % self.user_info_build["make"].make, run_environment=True)
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
-        self.copy("*", src="web", dst="web")
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def deploy(self):
-        self.copy("*", src="web", dst="web")
+        self.copy("*", src="bin", dst="web")

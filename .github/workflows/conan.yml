@@ -24,16 +24,27 @@ jobs:
     env:
       BPT_CONFIG_FILE_VERSION: "11"
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: "0"
       - uses: actions/setup-python@v2
         with:
           python-version: "3.8"
       - name: Install Conan
         run: |
-          pip install conan
+          pip install conan pyyaml
+          conan config init
         shell: bash
+      - name: Add compiler to conan settings
+        run: |
+          import yaml, os
+          with open(os.path.expanduser("~/.conan/settings.yml"), "r") as file:
+              y=yaml.safe_load(file)
+          y["compiler"]["clang"]["version"].append("14")
+          with open(os.path.expanduser("~/.conan/settings.yml"), "w") as file:
+              yaml.dump(y, file, default_flow_style=False, sort_keys=False)
+        shell: python
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: "0"
       - name: Run
         env:
           CONAN_LOGIN_USERNAME: ${{ secrets.CONAN_LOGIN_USERNAME }}

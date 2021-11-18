@@ -1,6 +1,8 @@
 [settings]
 os=Emscripten
 arch=wasm
-build_type=Release
+build_type=Debug
+compiler=clang
+compiler.version=14
 [build_requires]
 emsdk/2.0.31
