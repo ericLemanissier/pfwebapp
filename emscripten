@@ -5,4 +5,4 @@ build_type=Debug
 compiler=clang
 compiler.version=14
 [build_requires]
-emsdk/2.0.31
+emsdk/2.0.34

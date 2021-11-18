@@ -11,7 +11,7 @@ class PfWebApp(ConanFile):
 
     def requirements(self):
         self.requires("imgui/1.85")
-        self.requires("implot/0.11")
+        self.requires("implot/0.12")
 
     def export_sources(self):
         self.copy("shell_minimal.html")
