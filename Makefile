@@ -34,8 +34,9 @@ EMS =
 
 # ("EMS" options gets added to both CPPFLAGS and LDFLAGS, whereas some options are for linker only)
 EMS += -s USE_SDL=2
-EMS += -s DISABLE_EXCEPTION_CATCHING=1
-LDFLAGS += -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s NO_EXIT_RUNTIME=0 -s ASSERTIONS=1
+#EMS += -s DISABLE_EXCEPTION_CATCHING=1
+#LDFLAGS += -s WASM=1 -s NO_EXIT_RUNTIME=0 -s ASSERTIONS=1
+LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
 # Uncomment next line to fix possible rendering bugs with Emscripten version older then 1.39.0 (https://github.com/ocornut/imgui/issues/2877)
 #EMS += -s BINARYEN_TRAP_MODE=clamp
