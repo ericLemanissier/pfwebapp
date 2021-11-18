@@ -155,6 +155,27 @@ static void main_loop(void* arg)
         ImGui::SameLine();
         ImGui::Text("counter = %d", counter);
 
+        if (ImGui::Button("Bluetooth"))
+        {
+            EM_ASM(
+                navigator.bluetooth.getAvailability().then(available => {
+                if (available)
+                {
+                    console.log("This device supports Bluetooth!");
+                    navigator.bluetooth.requestDevice({acceptAllDevices: true}).then(function(device) {
+                        console.log('Name: ' + device.name);
+                        // Do something with the device.
+                        })
+                        .catch(function(error) {
+                        console.log("Something went wrong. " + error);
+                        });
+                }
+                else
+                    console.log("Doh! Bluetooth is not supported");
+                });
+            );
+        }
+
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();
     }
