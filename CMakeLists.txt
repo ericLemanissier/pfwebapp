@@ -14,7 +14,7 @@ target_link_libraries(${PROJECT_NAME} implot::implot)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_DISABLE_FILE_FUNCTIONS)
 target_compile_options(${PROJECT_NAME} PRIVATE -sUSE_SDL=2)
-target_link_options(${PROJECT_NAME} PRIVATE -sUSE_SDL=2  -sALLOW_MEMORY_GROWTH=1 --shell-file shell_minimal.html -sNO_FILESYSTEM=1 -sASYNCIFY=1 --bind)
+target_link_options(${PROJECT_NAME} PRIVATE -sUSE_SDL=2  -sALLOW_MEMORY_GROWTH=1 --shell-file shell_minimal.html -sNO_FILESYSTEM=1 -sASYNCIFY=1 --bind -O3)
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
 
 install(TARGETS ${PROJECT_NAME}
