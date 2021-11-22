@@ -17,6 +17,33 @@
 
 #include "implot.h"
 #include <emscripten/val.h>
+#include <emscripten/bind.h>
+
+void btAvailableCb(bool available)
+{
+    const auto console = emscripten::val::global("console");
+    console.call<void>("log", std::string("buetooth: ") + (available ?  "true": "false"));
+    if(available)
+    {
+        auto options = emscripten::val::object();
+        options.set("acceptAllDevices", true);
+        const auto bluetooth = emscripten::val::global("navigator")["bluetooth"];
+        bluetooth.call<emscripten::val>("requestDevice", options).call<void>("then", emscripten::val::module_property("btDeviceCb"));
+    }
+}
+
+void btDeviceCb(emscripten::val device)
+{
+    const auto console = emscripten::val::global("console");
+    console.call<void>("log", std::string("name: ") + device["name"].as<std::string>());
+}
+
+EMSCRIPTEN_BINDINGS(bluetooth_bindings) {
+    emscripten::function("btAvailableCb", &btAvailableCb);
+    emscripten::function("btDeviceCb", &btDeviceCb);
+}
+
+
 
 namespace ImPlot {
 void ShowDemoWindow(bool* p_open);
@@ -158,23 +185,8 @@ static void main_loop(void* arg)
 
         if (ImGui::Button("Bluetooth"))
         {
-            const auto navigator = emscripten::val::global("navigator");
-            const auto bluetooth = navigator["bluetooth"];
-            const auto available = bluetooth.call<emscripten::val>("getAvailability").await();
-            if (available.as<bool>())
-            {
-                auto options = emscripten::val::object();
-                options.set("acceptAllDevices", true);
-                const auto device = bluetooth.call<emscripten::val>("requestDevice", options).await();
-                const auto console = emscripten::val::global("console");
-                console.call<void>("log", std::string("name: ") + device["name"].as<std::string>());
-            }
-            else
-            {
-                EM_ASM(
-                    alert('bluetooth not available');
-                );
-            }
+            const auto bluetooth = emscripten::val::global("navigator")["bluetooth"];
+            bluetooth.call<emscripten::val>("getAvailability").call<void>("then", emscripten::val::module_property("btAvailableCb"));
         }
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
