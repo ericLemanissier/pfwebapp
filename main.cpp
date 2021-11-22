@@ -19,28 +19,24 @@
 #include <emscripten/val.h>
 #include <emscripten/bind.h>
 
-void btAvailableCb(bool available)
-{
-    const auto console = emscripten::val::global("console");
-    console.call<void>("log", std::string("buetooth: ") + (available ?  "true": "false"));
-    if(available)
-    {
-        auto options = emscripten::val::object();
-        options.set("acceptAllDevices", true);
-        const auto bluetooth = emscripten::val::global("navigator")["bluetooth"];
-        bluetooth.call<emscripten::val>("requestDevice", options).call<void>("then", emscripten::val::module_property("btDeviceCb"));
-    }
-}
-
-void btDeviceCb(emscripten::val device)
-{
-    const auto console = emscripten::val::global("console");
-    console.call<void>("log", std::string("name: ") + device["name"].as<std::string>());
-}
-
 EMSCRIPTEN_BINDINGS(bluetooth_bindings) {
-    emscripten::function("btAvailableCb", &btAvailableCb);
-    emscripten::function("btDeviceCb", &btDeviceCb);
+    emscripten::function("btAvailableCb", +[](bool available)
+    {
+        const auto console = emscripten::val::global("console");
+        console.call<void>("log", std::string("buetooth: ") + (available ?  "true": "false"));
+        if(available)
+        {
+            auto options = emscripten::val::object();
+            options.set("acceptAllDevices", true);
+            const auto bluetooth = emscripten::val::global("navigator")["bluetooth"];
+            bluetooth.call<emscripten::val>("requestDevice", options).call<void>("then", emscripten::val::module_property("btDeviceCb"));
+        }
+    });
+    emscripten::function("btDeviceCb", +[](emscripten::val device)
+    {
+        const auto console = emscripten::val::global("console");
+        console.call<void>("log", std::string("name: ") + device["name"].as<std::string>());
+    });
 }
 
 
